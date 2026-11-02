@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: ifthenpay | Payments for Forminator
- * Plugin URI: https://ifthenpay.com
+ * Plugin URI: https://github.com/ifthenpay/ifthenpay-payments-for-forminator
  * Description: Accept ifthenpay payments (card, Apple Pay, Google Pay, Cofidis, Pix, Multibanco, MB WAY) in Forminator via Pay by Link, with webhook-confirmed payment status.
  * Version: 1.0.0
  * Requires at least: 6.4
