@@ -1,0 +1,967 @@
+/* The builder's field icon class isn't a built-in Forminator icon, so it gets its glyph from here. */
+@font-face {
+	font-family: ifthenpay-icons;
+	src: url('../fonts/ifthenpay-icons.woff2') format('woff2'),
+		url('../fonts/ifthenpay-icons.woff') format('woff'),
+		url('../fonts/ifthenpay-icons.ttf') format('truetype');
+	font-weight: normal;
+	font-style: normal;
+	font-display: block;
+}
+
+/* My own prefix, so Forminator's [class*=forminator-icon-] !important font catch-all never matches it.
+   I bring the glyph basics that catch-all used to give it. */
+.iftp-fm-icon::before {
+	display: inline-block;
+	font-family: ifthenpay-icons;
+	font-size: 1em;
+	font-style: normal;
+	font-weight: 100;
+	line-height: 1;
+	text-transform: none;
+	color: #888;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	content: "\e002";
+}
+
+/* Hidden until SUI's dialog JS adds .sui-active. I don't lean on Forminator's .sui-<version> .sui-modal
+   rule: its body class isn't reliably there, and without it the modal renders inline. */
+#iftp-fm-connect-modal-wrap {
+	display: none;
+}
+
+#iftp-fm-connect-modal-wrap.sui-active {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: fixed;
+	/* SUI offsets its modal past the admin bar/menu; I cover the whole screen. */
+	inset: 0;
+	width: auto;
+	height: auto;
+	z-index: 100000;
+	overflow-y: auto;
+	padding: 30px 100px;
+	background: rgb(51 51 51 / 95%);
+}
+
+#iftp-fm-connect-modal-wrap .sui-modal-content {
+	width: 100%;
+	max-width: 560px;
+	margin: 0 20px;
+}
+
+/* SUI's settings row is a two-column flex row; I stack it for the modal. */
+#iftp-fm-connect-modal-wrap .sui-box-settings-row {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: 0;
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+#iftp-fm-connect-modal-wrap .sui-settings-label {
+	display: block;
+	margin: 0 0 8px;
+	font-weight: 700;
+	color: #333;
+}
+
+#iftp-fm-connect-modal-wrap .sui-form-control {
+	display: block;
+	width: 100%;
+	max-width: none;
+	box-sizing: border-box;
+}
+
+#iftp-fm-connect-modal-wrap .sui-description {
+	display: block;
+	margin: 6px 0 0;
+	color: #888;
+	font-size: 12px;
+	line-height: 1.5;
+}
+
+/* 100px of side padding leaves the modal ~150px wide on a phone. */
+@media (max-width: 782px) {
+	#iftp-fm-connect-modal-wrap.sui-active,
+	#iftp-fm-field-modal-wrap.iftp-fm-active {
+		padding: 20px 0;
+	}
+}
+
+#iftp-fm-connect-message:empty {
+	display: none;
+}
+
+#iftp-fm-connect-message {
+	margin: 10px 0 0;
+	color: #a23b3b;
+}
+
+/* Scrolls on its own rather than widening the settings page. */
+#iftp-fm-methods-table-wrapper {
+	overflow-x: auto;
+	transition: opacity .2s ease;
+}
+
+#iftp-fm-methods-table-wrapper[aria-busy="true"] {
+	opacity: 0.5;
+	pointer-events: none;
+}
+
+/* Cell layout is written out in full: sui-table's rules hang off a Forminator body class that isn't
+   reliably present, and without them the cells collapse into each other. */
+.iftp-fm-methods-table {
+	width: 100%;
+	table-layout: auto;
+	border-collapse: collapse;
+}
+
+.iftp-fm-methods-table th,
+.iftp-fm-methods-table td {
+	padding: 10px 12px;
+	vertical-align: middle;
+}
+
+/* Beats SUI's .sui-2-12-x .sui-wrap .sui-table tbody > tr > td:first-child (0,4,3) without chasing its version class. */
+.sui-wrap .iftp-fm-methods-table.sui-table .iftp-fm-col-control.iftp-fm-col-control {
+	padding-left: 15px;
+}
+
+.iftp-fm-methods-table .iftp-fm-col-control {
+	/* A fixed width, not 1%: if SUI's table-layout: fixed applies, 1% collapses the column. */
+	width: 56px;
+	white-space: nowrap;
+	text-align: center;
+	vertical-align: middle;
+}
+
+.iftp-fm-methods-table .iftp-fm-col-divider {
+	border-right: 1px solid #e6e6e6;
+	padding-right: 16px;
+}
+
+.iftp-fm-col-method {
+	text-align: left;
+	padding-left: 18px;
+}
+
+.iftp-fm-logo-slot {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 64px;
+	margin-right: 12px;
+}
+
+.iftp-fm-logo-slot img {
+	max-width: 64px;
+	max-height: 28px;
+}
+
+.iftp-fm-method-label.iftp-fm-dimmed {
+	opacity: 0.5;
+}
+
+.iftp-fm-account-pill {
+	display: inline-block;
+	height: 24px;
+	line-height: 24px;
+	padding: 0 10px;
+	border-radius: 12px;
+	background: #f1f1f1;
+	font-size: 12px;
+}
+
+.iftp-fm-status-badge {
+	display: inline-block;
+	padding: 2px 8px;
+	border-radius: 10px;
+	font-size: 12px;
+}
+
+/* Enabled = green, Activated (provisioned but switched off) = gray, Unavailable = red. */
+.iftp-fm-status-badge--enabled {
+	background: #d3f9f5;
+	color: #0a6e63;
+}
+
+.iftp-fm-status-badge--activated {
+	background: #eee;
+	color: #666;
+}
+
+.iftp-fm-status-badge--unavailable {
+	background: #fbeaea;
+	color: #a23b3b;
+}
+
+.iftp-fm-status-cell {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 10px;
+}
+
+.iftp-fm-star {
+	display: inline-block;
+	cursor: pointer;
+	font-size: 18px;
+	color: #ccc;
+}
+
+.iftp-fm-default-method:checked + .iftp-fm-star {
+	color: #f2a900;
+}
+
+.iftp-fm-star--hidden {
+	visibility: hidden;
+}
+
+.iftp-fm-default-method:disabled + .iftp-fm-star {
+	cursor: not-allowed;
+}
+
+/* The radio itself is visually hidden, so the star carries its focus ring. */
+.iftp-fm-default-method:focus-visible + .iftp-fm-star {
+	outline: 2px solid #17a8e3;
+	outline-offset: 2px;
+	border-radius: 2px;
+}
+
+@keyframes iftp-fm-star-wink {
+	0% {
+		transform: scale(1) rotate(0deg);
+	}
+
+	50% {
+		transform: scale(1.35) rotate(-12deg);
+	}
+
+	100% {
+		transform: scale(1) rotate(0deg);
+	}
+}
+
+.iftp-fm-star--wink {
+	animation: iftp-fm-star-wink 0.4s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.iftp-fm-star--wink {
+		animation: none;
+	}
+}
+
+.iftp-fm-empty {
+	font-style: italic;
+	color: #666;
+}
+
+.iftp-fm-save-status {
+	margin-left: 10px;
+	color: #0a6e63;
+	opacity: 0;
+	transition: opacity 0.2s;
+}
+
+.iftp-fm-save-status--visible {
+	opacity: 1;
+}
+
+.iftp-fm-save-status--error {
+	color: #a23b3b;
+}
+
+/* Builder field popup. SUI's styles don't reliably reach markup I inject here, so it's styled outright
+   with values copied from Forminator's shared-ui.min.css, all scoped under the #id to win regardless of load order. */
+#iftp-fm-field-modal-wrap {
+	display: none;
+}
+
+#iftp-fm-field-modal-wrap.iftp-fm-active {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: fixed;
+	inset: 0;
+	z-index: 100000;
+	overflow-y: auto;
+	padding: 30px 100px;
+	background: rgb(51 51 51 / 95%);
+}
+
+#iftp-fm-field-modal-wrap .sui-modal-content {
+	width: 100%;
+	max-width: 560px;
+	margin: 0 20px;
+}
+
+#iftp-fm-field-modal-wrap .sui-box {
+	background: #fff;
+	border-radius: 4px;
+	box-shadow: 0 2px 0 #e6e6e6;
+	overflow: hidden;
+}
+
+#iftp-fm-field-modal-wrap .sui-box-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 15px 30px;
+	border-bottom: 1px solid #e6e6e6;
+}
+
+#iftp-fm-field-modal-wrap .sui-box-title {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin: 0;
+	font: 700 15px/30px 'Roboto', Arial, sans-serif;
+	color: #333;
+}
+
+#iftp-fm-field-modal-wrap .sui-box-title .iftp-fm-icon {
+	font-size: 16px;
+	color: #17a8e3;
+}
+
+/* sui-tag/sui-tooltip, redefined: SUI's own rules sit under .sui-2-12-27 .sui-wrap, which this modal isn't inside. */
+#iftp-fm-field-modal-wrap .sui-tag {
+	display: inline-block;
+	min-height: 26px;
+	margin: 0 3px;
+	padding: 0 16px;
+	border: 2px solid transparent;
+	border-radius: 13px;
+	background-color: #f2f2f2;
+	color: #333;
+	font: 500 12px/22px 'Roboto', Arial, sans-serif;
+	letter-spacing: -0.25px;
+	text-align: center;
+	cursor: default;
+	vertical-align: middle;
+}
+
+#iftp-fm-field-modal-wrap .sui-tooltip {
+	position: relative;
+}
+
+/* Scoped under the wrap so it beats the .sui-tag margin reset above. */
+#iftp-fm-field-modal-wrap #iftp-fm-field-modal-tag {
+	margin-top: -2px;
+	--tooltip-width: 170px;
+}
+
+#iftp-fm-field-modal-wrap .sui-tooltip::before,
+#iftp-fm-field-modal-wrap .sui-tooltip::after {
+	content: '';
+	opacity: 0;
+	pointer-events: none;
+	position: absolute;
+	z-index: 100001;
+	transition: opacity .2s ease;
+}
+
+#iftp-fm-field-modal-wrap .sui-tooltip::before {
+	left: 50%;
+	bottom: 100%;
+	border: 5px solid transparent;
+	border-top-color: #333;
+	transform: translateX(-50%);
+}
+
+#iftp-fm-field-modal-wrap .sui-tooltip::after {
+	content: attr(data-tooltip);
+	left: 50%;
+	bottom: 100%;
+	min-width: 40px;
+	margin-bottom: 10px;
+	padding: 8px 12px;
+	border-radius: 4px;
+	background-color: #333;
+	box-sizing: border-box;
+	transform: translateX(-50%);
+	color: #fff;
+	font: 500 12px/18px 'Roboto', Arial, sans-serif;
+	letter-spacing: -0.25px;
+	text-align: center;
+	white-space: nowrap;
+}
+
+#iftp-fm-field-modal-wrap .sui-tooltip.sui-tooltip-constrained::after {
+	min-width: var(--tooltip-width, 240px);
+	white-space: normal;
+}
+
+#iftp-fm-field-modal-wrap .sui-tooltip.sui-tooltip-bottom::before {
+	top: 100%;
+	bottom: auto;
+	border-top-color: transparent;
+	border-bottom-color: #333;
+}
+
+#iftp-fm-field-modal-wrap .sui-tooltip.sui-tooltip-bottom::after {
+	top: 100%;
+	bottom: auto;
+	margin-top: 10px;
+	margin-bottom: 0;
+}
+
+#iftp-fm-field-modal-wrap .sui-tooltip:hover::before,
+#iftp-fm-field-modal-wrap .sui-tooltip:hover::after,
+#iftp-fm-field-modal-wrap .sui-tooltip:focus::before,
+#iftp-fm-field-modal-wrap .sui-tooltip:focus::after {
+	opacity: 1;
+}
+
+#iftp-fm-field-modal-wrap .iftp-fm-field-modal-close {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	border: none;
+	border-radius: 3px;
+	background: transparent;
+	color: #666;
+	font-size: 20px;
+	line-height: 1;
+	cursor: pointer;
+}
+
+#iftp-fm-field-modal-wrap .iftp-fm-field-modal-close:hover {
+	background: #f1f1f1;
+	color: #333;
+}
+
+#iftp-fm-field-modal-wrap button:focus-visible,
+#iftp-fm-field-modal-wrap .sui-side-tabs .sui-tab-item:focus-within {
+	outline: 2px solid #17a8e3;
+	outline-offset: 2px;
+}
+
+#iftp-fm-field-modal-wrap .sui-toggle input:focus-visible ~ .sui-toggle-slider {
+	box-shadow: 0 0 0 4px #b8e3f5;
+}
+
+#iftp-fm-field-modal-wrap .sui-box-body {
+	padding: 30px;
+}
+
+#iftp-fm-field-modal-wrap .sui-box-footer {
+	padding: 30px;
+	border-top: 1px solid #e6e6e6;
+}
+
+@media (max-width: 782px) {
+	#iftp-fm-field-modal-wrap .sui-box-body,
+	#iftp-fm-field-modal-wrap .sui-box-footer {
+		padding: 20px;
+	}
+}
+
+#iftp-fm-field-modal-wrap .sui-actions-right {
+	display: flex;
+	justify-content: flex-end;
+	gap: 10px;
+}
+
+#iftp-fm-field-modal-wrap .sui-box-settings-row {
+	margin-bottom: 16px;
+}
+
+#iftp-fm-field-modal-wrap .sui-box-settings-row:last-child {
+	margin-bottom: 0;
+}
+
+#iftp-fm-field-modal-wrap .sui-box-settings-row.iftp-fm-hidden {
+	display: none;
+}
+
+#iftp-fm-field-modal-wrap .sui-settings-label {
+	display: block;
+	margin-bottom: 8px;
+	font-weight: 700;
+	color: #333;
+}
+
+#iftp-fm-field-modal-wrap .sui-box-settings-row label {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	font-weight: 400;
+	cursor: pointer;
+}
+
+#iftp-fm-field-modal-wrap .description {
+	margin: 6px 0 0;
+	color: #666;
+	font-size: 12px;
+}
+
+#iftp-fm-field-modal-wrap .sui-form-control {
+	display: block;
+	width: 100%;
+	box-sizing: border-box;
+	padding: 9px 14px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	background-color: #fafafa;
+	color: #333;
+	font-size: 14px;
+	line-height: 1.4;
+	transition: border-color .3s ease, background-color .3s ease, box-shadow .3s ease;
+}
+
+#iftp-fm-field-modal-wrap .sui-form-control::placeholder {
+	color: #aaa;
+}
+
+#iftp-fm-field-modal-wrap .sui-form-control:hover {
+	border-color: #aaa;
+	background-color: #fff;
+}
+
+#iftp-fm-field-modal-wrap .sui-form-control:focus {
+	border-color: #17a8e3;
+	background-color: #fff;
+	outline: none;
+	box-shadow: 0 0 0 2px #e1f6ff;
+}
+
+#iftp-fm-field-modal-wrap .iftp-fm-select:focus {
+	border-color: #17a8e3;
+	outline: none;
+}
+
+/* Not .sui-select: SUI's JS turns every .sui-select on the page into a select2, which breaks inside this modal.
+   appearance: none plus my own chevron, as SUI does for native selects, so the arrow doesn't misalign. */
+#iftp-fm-field-modal-wrap .iftp-fm-select {
+	display: block;
+	width: 100%;
+	box-sizing: border-box;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	cursor: pointer;
+	padding: 8px 34px 8px 12px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	color: #333;
+	font-size: 14px;
+	line-height: 1.4;
+	background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23666' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 12px center;
+	background-size: 10px 7px;
+}
+
+#iftp-fm-field-modal-wrap .iftp-fm-select::-ms-expand {
+	display: none;
+}
+
+/* Radio groups styled as SUI side-tabs. .active is presentational only, kept in sync by field-settings.js. */
+#iftp-fm-field-modal-wrap .sui-side-tabs .sui-tabs-menu {
+	display: inline-flex;
+	margin: 0;
+	padding: 0;
+	border-radius: 4px;
+	overflow: hidden;
+	border: 1px solid #f8f8f8;
+	list-style: none;
+	vertical-align: middle;
+}
+
+#iftp-fm-field-modal-wrap .sui-side-tabs .sui-tab-item {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	margin: 0;
+	padding: 9px 20px;
+	background-color: #f8f8f8;
+	color: #666;
+	font: 500 13px/22px 'Roboto', Arial, sans-serif;
+	letter-spacing: -0.25px;
+	cursor: pointer;
+	transition: background-color .2s ease, color .2s ease;
+}
+
+#iftp-fm-field-modal-wrap .sui-side-tabs .sui-tab-item:hover {
+	background-color: #e6e6e6;
+}
+
+#iftp-fm-field-modal-wrap .sui-side-tabs .sui-tab-item.active {
+	background-color: #e1f6ff;
+	color: #17a8e3;
+}
+
+#iftp-fm-field-modal-wrap .sui-side-tabs .sui-tab-item input {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	border: 0;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+}
+
+#iftp-fm-field-modal-wrap .iftp-fm-toggle-list {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+#iftp-fm-field-modal-wrap .sui-toggle {
+	display: inline-flex;
+	align-items: center;
+	position: relative;
+	padding-left: 44px;
+	min-height: 16px;
+	cursor: pointer;
+}
+
+#iftp-fm-field-modal-wrap .sui-toggle input {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	border: 0;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+}
+
+#iftp-fm-field-modal-wrap .sui-toggle-slider {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 34px;
+	height: 16px;
+	border-radius: 8px;
+	background-color: #aaa;
+	transition: background-color .3s ease;
+}
+
+#iftp-fm-field-modal-wrap .sui-toggle-slider::before {
+	content: '';
+	position: absolute;
+	top: 1px;
+	left: 1px;
+	width: 14px;
+	height: 14px;
+	border-radius: 50%;
+	background-color: #fff;
+	transition: transform .2s linear;
+}
+
+#iftp-fm-field-modal-wrap .sui-toggle input:checked ~ .sui-toggle-slider {
+	background-color: #17a8e3;
+}
+
+#iftp-fm-field-modal-wrap .sui-toggle input:checked ~ .sui-toggle-slider::before {
+	transform: translateX(18px);
+}
+
+#iftp-fm-field-modal-wrap .sui-toggle input:focus ~ .sui-toggle-slider {
+	box-shadow: 0 0 0 4px #e6e6e6;
+}
+
+#iftp-fm-field-modal-wrap .sui-toggle input:focus:checked ~ .sui-toggle-slider {
+	box-shadow: 0 0 0 4px #d1eaf4;
+}
+
+#iftp-fm-field-modal-wrap .sui-toggle-label {
+	margin-left: 12px;
+	font: 500 14px/1.4 'Roboto', Arial, sans-serif;
+	color: #333;
+}
+
+#iftp-fm-field-modal-wrap .sui-button {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	min-width: 80px;
+	padding: 5px 14px;
+	border: 2px solid transparent;
+	border-radius: 4px;
+	font: 500 12px/16px 'Roboto', Arial, sans-serif;
+	letter-spacing: -0.25px;
+	text-transform: uppercase;
+	cursor: pointer;
+	background: #888;
+	color: #fff;
+	transition: all .3s ease;
+}
+
+#iftp-fm-field-modal-wrap .sui-button-blue {
+	background: #17a8e3;
+	color: #fff;
+}
+
+#iftp-fm-field-modal-wrap .sui-button-blue:hover {
+	background: #0f8fc4;
+}
+
+#iftp-fm-field-modal-wrap .sui-button-ghost {
+	background: transparent;
+	border-color: #ddd;
+	color: #888;
+}
+
+#iftp-fm-field-modal-wrap .sui-button-ghost:hover {
+	border-color: #888;
+	background: #888;
+	color: #fff;
+}
+
+#iftp-fm-field-modal-wrap .sui-button:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+#iftp-fm-field-modal-wrap .sui-icon-loader {
+	display: none;
+}
+
+/* Not sui-icon-*: SUI's body-scoped [class*=sui-icon-] rule forces its icon font, which has no glyph
+   for these. Drawn as CSS shapes so they stay crisp and bold. */
+#iftp-fm-field-modal-wrap .iftp-fm-icon-close {
+	position: relative;
+	display: inline-block;
+	width: 10px;
+	height: 10px;
+	vertical-align: middle;
+}
+
+#iftp-fm-field-modal-wrap .iftp-fm-icon-close::before,
+#iftp-fm-field-modal-wrap .iftp-fm-icon-close::after {
+	content: '';
+	position: absolute;
+	top: 50%;
+	left: 0;
+	width: 100%;
+	height: 2px;
+	background: currentColor;
+	border-radius: 1px;
+}
+
+#iftp-fm-field-modal-wrap .iftp-fm-icon-close::before {
+	transform: translateY(-50%) rotate(45deg);
+}
+
+#iftp-fm-field-modal-wrap .iftp-fm-icon-close::after {
+	transform: translateY(-50%) rotate(-45deg);
+}
+
+#iftp-fm-field-modal-wrap .iftp-fm-icon-check {
+	display: inline-block;
+	width: 8px;
+	height: 5px;
+	margin-bottom: 2px;
+	border-left: 2px solid currentColor;
+	border-bottom: 2px solid currentColor;
+	transform: rotate(-45deg);
+	vertical-align: middle;
+}
+
+#iftp-fm-field-modal-wrap .sui-loading-text {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+
+#iftp-fm-field-modal-wrap .sui-box-footer.sui-content-separated {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+}
+
+#iftp-fm-field-modal-message:empty {
+	display: none;
+}
+
+#iftp-fm-field-modal-message {
+	color: #a23b3b;
+	margin-bottom: 16px;
+}
+
+/* Matches Forminator's flushed field-settings tabs: the active tab is dark (#333), not the blue accent. */
+#iftp-fm-field-modal-wrap .iftp-fm-field-tabs {
+	display: flex;
+	padding: 0 30px;
+}
+
+#iftp-fm-field-modal-wrap .iftp-fm-field-tab {
+	margin: 0 10px;
+	padding: 14px 0 12px;
+	border: none;
+	border-bottom: 2px solid transparent;
+	background: none;
+	color: #888;
+	font: 500 13px/22px 'Roboto', Arial, sans-serif;
+	letter-spacing: -0.25px;
+	text-transform: uppercase;
+	cursor: pointer;
+}
+
+#iftp-fm-field-modal-wrap .iftp-fm-field-tab:first-child {
+	margin-left: 0;
+}
+
+#iftp-fm-field-modal-wrap .iftp-fm-field-tab:hover {
+	color: #333;
+}
+
+#iftp-fm-field-modal-wrap .iftp-fm-field-tab--active {
+	color: #333;
+	border-bottom-color: #333;
+}
+
+#iftp-fm-field-modal-wrap .iftp-fm-field-tab-panel[hidden] {
+	display: none;
+}
+
+#iftp-fm-field-modal-wrap .iftp-fm-conditional-body {
+	min-width: 0;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	transition: opacity .2s ease;
+}
+
+/* Locked until "Enable conditional logic" is ticked. */
+#iftp-fm-field-modal-wrap .iftp-fm-conditional-body:disabled {
+	opacity: 0.5;
+}
+
+#iftp-fm-field-modal-wrap .iftp-fm-conditional-body:disabled .sui-tab-item,
+#iftp-fm-field-modal-wrap .iftp-fm-conditional-body:disabled .iftp-fm-condition-remove {
+	cursor: not-allowed;
+}
+
+#iftp-fm-field-modal-wrap .iftp-fm-conditional-body:disabled .sui-tab-item:not(.active):hover {
+	background-color: #f8f8f8;
+}
+
+#iftp-fm-field-modal-wrap .iftp-fm-conditional-summary {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+	margin: 10px 0;
+}
+
+#iftp-fm-field-modal-wrap .iftp-fm-condition-row {
+	display: grid;
+	grid-template-columns: 1fr 1fr 1fr auto;
+	gap: 8px;
+	align-items: center;
+	margin-bottom: 8px;
+}
+
+#iftp-fm-field-modal-wrap .iftp-fm-condition-remove {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	border: 1px solid #c1c1c1;
+	border-radius: 3px;
+	background: #fff;
+	color: #666;
+	cursor: pointer;
+	font-size: 16px;
+	line-height: 1;
+}
+
+@media (max-width: 600px) {
+	#iftp-fm-field-modal-wrap .iftp-fm-condition-row {
+		grid-template-columns: 1fr auto;
+	}
+
+	#iftp-fm-field-modal-wrap .iftp-fm-condition-row > :not(.iftp-fm-condition-remove) {
+		grid-column: 1;
+	}
+
+	#iftp-fm-field-modal-wrap .iftp-fm-condition-remove {
+		grid-column: 2;
+		grid-row: 1;
+	}
+
+	#iftp-fm-field-modal-wrap .sui-side-tabs .sui-tabs-menu {
+		flex-wrap: wrap;
+	}
+}
+
+#iftp-fm-field-modal-wrap .iftp-fm-condition-remove:hover {
+	background: #fbeaea;
+	color: #a23b3b;
+	border-color: #a23b3b;
+}
+
+#iftp-fm-field-modal-wrap #iftp-fm-field-condition-add {
+	margin-top: 4px;
+}
+
+/* ID-scoped so SUI's .sui-wrap label/field margins don't win. */
+#sui-box-ifthenpay .iftp-fm-connect-actions,
+#iftp-fm-settings-form .iftp-fm-label-spaced {
+	margin-top: 10px;
+}
+
+#iftp-fm-settings-form .iftp-fm-checkbox-spaced {
+	margin-top: 6px;
+}
+
+.iftp-fm-confirmation-tabs {
+	display: flex;
+	gap: 4px;
+	margin-bottom: 16px;
+	border-bottom: 1px solid #e2e2e2;
+}
+
+.iftp-fm-confirmation-tab {
+	padding: 8px 14px;
+	border: none;
+	border-bottom: 2px solid transparent;
+	background: none;
+	color: #666;
+	font-size: 14px;
+	cursor: pointer;
+}
+
+.iftp-fm-confirmation-tab:hover {
+	color: #333;
+}
+
+.iftp-fm-confirmation-tab--active {
+	color: #0b6f99;
+	border-bottom-color: #17a8e3;
+	font-weight: 600;
+}
+
+.iftp-fm-confirmation-tab:focus-visible {
+	outline: 2px solid #17a8e3;
+	outline-offset: -2px;
+}
+
+#iftp-fm-field-modal-wrap .sui-box-body[aria-busy="true"] {
+	opacity: 0.5;
+	pointer-events: none;
+	transition: opacity .2s ease;
+}
+
+.iftp-fm-connect-modal-message:empty {
+	display: none;
+}
+
+.iftp-fm-connect-modal-message {
+	margin: 10px 0 0;
+	color: #a23b3b;
+}
